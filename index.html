@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Striker - Mini Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>🏏 Cricket Striker</h1>
+            <p class="tagline">Time your shot perfectly!</p>
+        </header>
+
+        <div class="game-screen" id="gameScreen">
+            <!-- Start Screen -->
+            <div class="screen" id="startScreen">
+                <h2>Welcome to Cricket Striker!</h2>
+                <p>Hit the ball when it's in the perfect zone</p>
+                <div class="instructions">
+                    <h3>How to Play:</h3>
+                    <ul>
+                        <li>Press <strong>SPACEBAR</strong> or click <strong>HIT</strong> to bat</li>
+                        <li>Time your shot when the ball is in the <span style="color: #4caf50;">GREEN ZONE</span></li>
+                        <li>Green zone = 4 or 6 runs!</li>
+                        <li>Yellow zone = 1-2 runs</li>
+                        <li>Red zone = OUT!</li>
+                        <li>3 outs and you're done</li>
+                    </ul>
+                </div>
+                <button class="btn-primary" onclick="startGame()">Start Game</button>
+            </div>
+
+            <!-- Game Play Screen -->
+            <div class="screen hidden" id="playScreen">
+                <div class="scoreboard">
+                    <div class="score-item">
+                        <span class="label">Score:</span>
+                        <span class="value" id="score">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="label">Balls:</span>
+                        <span class="value" id="balls">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="label">Outs:</span>
+                        <span class="value" id="outs">0/3</span>
+                    </div>
+                </div>
+
+                <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+                <div class="controls">
+                    <button class="btn-hit" id="hitBtn" onclick="swing()">HIT! (Spacebar)</button>
+                </div>
+
+                <div class="message" id="message"></div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div class="screen hidden" id="gameOverScreen">
+                <h2>Game Over!</h2>
+                <div class="final-score">
+                    <p>Final Score</p>
+                    <h1 id="finalScore">0</h1>
+                    <p id="finalBalls">Balls Faced: 0</p>
+                </div>
+                <div class="stats" id="stats"></div>
+                <button class="btn-primary" onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Made with ❤️ for cricket fans</p>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
