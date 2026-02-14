@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Striker - Complete</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .game-screen {
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .screen {
+            display: block;
+        }
+
+        .screen.hidden {
+            display: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .instructions ul {
+            list-style: none;
+        }
+
+        .instructions li {
+            padding: 5px 0;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .score-item {
+            text-align: center;
+            margin: 5px;
+        }
+
+        .score-item .label {
+            display: block;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .score-item .value {
+            display: block;
+            color: #333;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        #gameCanvas {
+            display: block;
+            margin: 20px auto;
+            border: 3px solid #333;
+            border-radius: 10px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .btn-hit {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.5em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            min-height: 40px;
+            margin-top: 20px;
+        }
+
+        .skill-card {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .skill-card.selected {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .skill-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .skill-cost {
+            background: #ffd700;
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .final-score {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .final-score h1 {
+            font-size: 4em;
+            margin: 10px 0;
+        }
+
+        .stats {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .stats p {
+            padding: 5px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>🏏 Cricket Striker</h1>
+            <p>Earn coins and unlock special shots!</p>
+        </header>
+
+        <div class="game-screen">
+            <!-- Start Screen -->
+            <div class="screen" id="startScreen">
+                <h2 style="text-align: center; margin-bottom: 20px;">Welcome!</h2>
+                
+                <div class="instructions">
+                    <h3>💰 Your Stats</h3>
+                    <p><strong>Coins:</strong> <span id="startCoins" style="color: #ffd700;">0</span></p>
+                    <p><strong>High Score:</strong> <span id="startHighScore">0</span></p>
+                    <p><strong>Games Played:</strong> <span id="startGames">0</span></p>
+                </div>
+
+                <div style="text-align: center;">
+                    <button class="btn-primary" onclick="showSkills()">Play Game</button>
+                    <button onclick="resetAll()" style="background: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-left: 10px;">Reset All</button>
+                </div>
+            </div>
+
+            <!-- Skills Screen -->
+            <div class="screen hidden" id="skillsScreen">
+                <h2 style="text-align: center;">Choose Your Skill</h2>
+                <div style="text-align: center; margin: 20px 0;">
+                    <strong>💰 Coins: <span id="shopCoins">0</span></strong>
+                </div>
+
+                <div id="skillsList"></div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn-primary" onclick="playGame()">Play Now!</button>
+                    <button onclick="backToStart()" style="background: #666; color: white; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; margin-left: 10px;">Back</button>
+                </div>
+            </div>
+
+            <!-- Play Screen -->
+            <div class="screen hidden" id="playScreen">
+                <div class="scoreboard">
+                    <div class="score-item">
+                        <span class="label">Score:</span>
+                        <span class="value" id="score">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="label">Coins:</span>
+                        <span class="value" id="coins" style="color: #ffd700;">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="label">Balls:</span>
+                        <span class="value" id="balls">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="label">Outs:</span>
+                        <span class="value" id="outs">0/2</span>
+                    </div>
+                </div>
+
+                <div style="text-align: center; padding: 10px; background: #667eea; border-radius: 10px; color: white; margin-bottom: 20px;">
+                    <strong>Active: <span id="activeSkill">🏏 Basic</span></strong>
+                </div>
+
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+                <div class="controls">
+                    <button class="btn-hit" onclick="swing()">HIT! (Spacebar)</button>
+                </div>
+
+                <div class="message" id="message"></div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div class="screen hidden" id="gameOverScreen">
+                <h2 style="text-align: center;">Game Over!</h2>
+                <div class="final-score">
+                    <p>Final Score</p>
+                    <h1 id="finalScore">0</h1>
+                    <p id="finalCoins">Coins Earned: 0</p>
+                </div>
+                <div class="stats" id="stats"></div>
+                <div style="text-align: center;">
+                    <button class="btn-primary" onclick="playAgain()">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let game = {
+            score: 0,
+            balls: 0,
+            outs: 0,
+            coins: 0,
+            coinsThisGame: 0,
+            running: false,
+            highScore: 0,
+            totalGames: 0,
+            savedCoins: 0,
+            currentSkill: 'basic',
+            unlockedSkills: ['basic']
+        };
+
+        // Skills
+        const skills = {
+            basic: { name: 'Basic', icon: '🏏', cost: 0, mult: 1, unlocked: true },
+            power: { name: 'Power Hit', icon: '💪', cost: 500, mult: 2, sixChance: 0.7 },
+            heli: { name: 'Helicopter', icon: '🚁', cost: 1500, mult: 3, sixChance: 0.8 },
+            switch: { name: 'Switch Hit', icon: '🔄', cost: 3000, mult: 4, zoneBonus: 1.5 },
+            scoop: { name: 'Scoop', icon: '🎯', cost: 5000, mult: 5, autoSix: true },
+            crazy: { name: 'Crazy Mode', icon: '🔥', cost: 10000, mult: 10, everySix: true }
+        };
+
+        // Canvas
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+
+        // Ball
+        let ball = {
+            x: 400,
+            y: 120,
+            speed: 4,
+            moving: false,
+            hit: false,
+            hitVelX: 0,
+            hitVelY: 0
+        };
+
+        // Batsman
+        let batsman = {
+            x: 400,
+            y: 480,
+            swinging: false,
+            swingFrame: 0
+        };
+
+        // Bowler
+        let bowler = {
+            x: 400,
+            y: 50,
+            runUpFrame: 0,
+            throwing: false,
+            armAngle: 0
+        };
+
+        // Load/Save
+        function loadGame() {
+            try {
+                const saved = localStorage.getItem('cricketGame');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    game.highScore = data.highScore || 0;
+                    game.totalGames = data.totalGames || 0;
+                    game.savedCoins = data.coins || 0;
+                    game.currentSkill = data.currentSkill || 'basic';
+                    game.unlockedSkills = data.unlockedSkills || ['basic'];
+                    
+                    // Update skills
+                    game.unlockedSkills.forEach(id => {
+                        if (skills[id]) skills[id].unlocked = true;
+                    });
+                }
+            } catch (e) {}
+        }
+
+        function saveGame() {
+            try {
+                localStorage.setItem('cricketGame', JSON.stringify({
+                    highScore: game.highScore,
+                    totalGames: game.totalGames,
+                    coins: game.savedCoins,
+                    currentSkill: game.currentSkill,
+                    unlockedSkills: game.unlockedSkills
+                }));
+            } catch (e) {}
+        }
+
+        // Show screens
+        function showSkills() {
+            hideAll();
+            document.getElementById('skillsScreen').classList.remove('hidden');
+            displaySkills();
+        }
+
+        function backToStart() {
+            hideAll();
+            document.getElementById('startScreen').classList.remove('hidden');
+            updateStartScreen();
+        }
+
+        function playGame() {
+            hideAll();
+            document.getElementById('playScreen').classList.remove('hidden');
+            startNewGame();
+        }
+
+        function playAgain() {
+            hideAll();
+            document.getElementById('skillsScreen').classList.remove('hidden');
+            displaySkills();
+        }
+
+        function hideAll() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        }
+
+        // Display skills
+        function displaySkills() {
+            const list = document.getElementById('skillsList');
+            document.getElementById('shopCoins').textContent = game.savedCoins;
+            list.innerHTML = '';
+
+            Object.keys(skills).forEach(id => {
+                const sk = skills[id];
+                const selected = game.currentSkill === id;
+                const canBuy = game.savedCoins >= sk.cost;
+                
+                const card = document.createElement('div');
+                card.className = `skill-card ${selected ? 'selected' : ''} ${!sk.unlocked && !canBuy ? 'locked' : ''}`;
+                
+                if (sk.unlocked || canBuy) {
+                    card.onclick = () => selectSkill(id);
+                }
+
+                card.innerHTML = `
+                    <div class="skill-header">
+                        <div><span style="font-size: 2em;">${sk.icon}</span> <strong>${sk.name}</strong></div>
+                        <div>
+                            ${sk.unlocked ? 
+                                '<span class="skill-cost" style="background: #4caf50;">OWNED</span>' :
+                                `<span class="skill-cost">${canBuy ? '💰' : '🔒'} ${sk.cost}</span>`
+                            }
+                        </div>
+                    </div>
+                    <p style="color: #666;">${
+                        sk.everySix ? 'Every hit is a SIX!' :
+                        sk.autoSix ? 'Auto-six on any hit!' :
+                        sk.sixChance ? `${Math.round(sk.sixChance * 100)}% chance of six` :
+                        sk.zoneBonus ? 'Bigger hitting zones' :
+                        'Standard shots'
+                    }</p>
+                    ${selected ? '<p style="color: #4caf50; font-weight: bold;">✓ SELECTED</p>' : ''}
+                `;
+
+                list.appendChild(card);
+            });
+        }
+
+        function selectSkill(id) {
+            const sk = skills[id];
+            if (!sk.unlocked) {
+                if (game.savedCoins >= sk.cost) {
+                    if (confirm(`Unlock ${sk.name} for ${sk.cost} coins?`)) {
+                        game.savedCoins -= sk.cost;
+                        sk.unlocked = true;
+                        game.unlockedSkills.push(id);
+                        game.currentSkill = id;
+                        saveGame();
+                        displaySkills();
+                    }
+                }
+            } else {
+                game.currentSkill = id;
+                saveGame();
+                displaySkills();
+            }
+        }
+
+        // Start new game
+        function startNewGame() {
+            game.score = 0;
+            game.balls = 0;
+            game.outs = 0;
+            game.coinsThisGame = 0;
+            game.running = true;
+            batsman.x = 400;
+
+            updateScoreboard();
+            setTimeout(bowlBall, 1000);
+        }
+
+        // Bowl ball
+        function bowlBall() {
+            if (!game.running) return;
+            
+            ball.x = 400;
+            ball.y = 120;
+            ball.moving = false;
+            ball.hit = false;
+            ball.speed = 4 + (game.balls * 0.15);
+            
+            bowler.runUpFrame = 0;
+            bowler.throwing = false;
+            bowler.y = 50;
+
+            animateBowlerRunUp();
+        }
+
+        function animateBowlerRunUp() {
+            if (bowler.runUpFrame < 30) {
+                bowler.runUpFrame++;
+                bowler.y = 50 + bowler.runUpFrame * 2;
+                bowler.armAngle = Math.sin(bowler.runUpFrame * 0.5) * 30;
+                
+                drawScene();
+                requestAnimationFrame(animateBowlerRunUp);
+            } else {
+                bowler.throwing = true;
+                animateThrow();
+            }
+        }
+
+        function animateThrow() {
+            if (bowler.runUpFrame < 45) {
+                bowler.runUpFrame++;
+                bowler.armAngle = -90 + ((bowler.runUpFrame - 30) * 18);
+                
+                drawScene();
+                requestAnimationFrame(animateThrow);
+            } else {
+                ball.moving = true;
+                bowler.throwing = false;
+                animateBall();
+            }
+        }
+
+        function animateBall() {
+            if (!ball.moving && !ball.hit) return;
+
+            // Move ball
+            if (ball.hit) {
+                // Ball hit - trajectory to boundary
+                ball.x += ball.hitVelX;
+                ball.y += ball.hitVelY;
+                ball.hitVelY += 0.3; // Gravity
+
+                // Check if reached boundary
+                const dist = Math.sqrt(Math.pow(ball.x - 400, 2) + Math.pow(ball.y - 300, 2));
+                if (dist > 280 || ball.y > 590) {
+                    // Ball reached boundary or went out
+                    ball.hit = false;
+                    setTimeout(() => {
+                        batsman.swinging = false;
+                        bowlBall();
+                    }, 1000);
+                    return;
+                }
+            } else {
+                ball.y += ball.speed;
+            }
+
+            drawScene();
+
+            // Check miss
+            if (!ball.hit && ball.y > batsman.y + 50) {
+                if (!batsman.swinging) {
+                    ballMissed();
+                    return;
+                }
+            }
+
+            if (ball.moving || ball.hit) {
+                requestAnimationFrame(animateBall);
+            }
+        }
+
+        function drawScene() {
+            // Draw
+            ctx.clearRect(0, 0, 800, 600);
+            
+            // Field
+            ctx.fillStyle = '#2d5016';
+            ctx.fillRect(0, 0, 800, 600);
+            
+            // Boundary circle
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(400, 300, 280, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Pitch
+            ctx.fillStyle = '#8b7355';
+            ctx.fillRect(350, 100, 100, 450);
+            
+            // Crease
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(320, batsman.y + 10);
+            ctx.lineTo(480, batsman.y + 10);
+            ctx.stroke();
+
+            // Bowler
+            drawBowler();
+
+            // Ball
+            ctx.fillStyle = '#dc143c';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Ball shine
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.beginPath();
+            ctx.arc(ball.x - 4, ball.y - 4, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Batsman
+            ctx.fillStyle = '#4caf50';
+            ctx.fillRect(batsman.x - 15, batsman.y, 30, 60);
+            ctx.fillStyle = '#ffdbac';
+            ctx.beginPath();
+            ctx.arc(batsman.x, batsman.y, 15, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Bat
+            if (batsman.swinging && batsman.swingFrame < 15) {
+                batsman.swingFrame++;
+                const angle = Math.sin(batsman.swingFrame * 0.3) * 60;
+                ctx.save();
+                ctx.translate(batsman.x, batsman.y + 30);
+                ctx.rotate(angle * Math.PI / 180);
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(-5, 0, 10, 50);
+                ctx.restore();
+            } else {
+                ctx.fillStyle = '#8b4513';
+                ctx.fillRect(batsman.x - 25, batsman.y + 55, 50, 10);
+            }
+        }
+
+        function drawBowler() {
+            // Body
+            ctx.fillStyle = '#2196f3';
+            ctx.fillRect(bowler.x - 12, bowler.y, 25, 50);
+            
+            // Head
+            ctx.fillStyle = '#ffdbac';
+            ctx.beginPath();
+            ctx.arc(bowler.x, bowler.y, 12, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Bowling arm
+            if (bowler.runUpFrame > 0) {
+                ctx.strokeStyle = '#ffdbac';
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(bowler.x, bowler.y + 20);
+                
+                const armLength = 35;
+                const armX = bowler.x + Math.cos(bowler.armAngle * Math.PI / 180) * armLength;
+                const armY = bowler.y + 25 + Math.sin(bowler.armAngle * Math.PI / 180) * armLength;
+                
+                ctx.lineTo(armX, armY);
+                ctx.stroke();
+            }
+            
+            // Other arm
+            ctx.strokeStyle = '#ffdbac';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(bowler.x, bowler.y + 20);
+            ctx.lineTo(bowler.x - 15, bowler.y + 35);
+            ctx.stroke();
+            
+            // Legs
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(bowler.x, bowler.y + 50);
+            ctx.lineTo(bowler.x - 10, bowler.y + 70);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(bowler.x, bowler.y + 50);
+            ctx.lineTo(bowler.x + 10, bowler.y + 70);
+            ctx.stroke();
+        }
+
+        // Swing
+        function swing() {
+            if (!game.running || batsman.swinging) return;
+
+            batsman.swinging = true;
+            batsman.swingFrame = 0;
+
+            const inRange = ball.y >= batsman.y - 80 && ball.y <= batsman.y + 10;
+            
+            if (inRange) {
+                checkHit();
+            } else {
+                setTimeout(() => {
+                    if (ball.moving) ballMissed();
+                }, 200);
+            }
+        }
+
+        // Check hit
+        function checkHit() {
+            ball.moving = false;
+
+            const sk = skills[game.currentSkill];
+            let runs = 0;
+            let msg = '';
+
+            // Determine runs
+            if (sk.everySix) {
+                runs = 6;
+                msg = '🔥 CRAZY SIX!';
+            } else if (sk.autoSix) {
+                runs = 6;
+                msg = `🎯 AUTO SIX! ${sk.icon}`;
+            } else {
+                const inZone = ball.x >= 370 && ball.x <= 430;
+                if (sk.sixChance && Math.random() < sk.sixChance) {
+                    runs = 6;
+                } else {
+                    runs = inZone ? [4, 6][Math.floor(Math.random() * 2)] : [1, 2][Math.floor(Math.random() * 2)];
+                }
+                msg = runs >= 4 ? `${runs === 6 ? '🎉 SIX!' : '🔥 FOUR!'}` : `✓ ${runs} run${runs > 1 ? 's' : ''}`;
+            }
+
+            // Coins: ONLY sixes give 5 coins
+            const coinsEarned = runs === 6 ? 5 : 0;
+            
+            game.score += runs;
+            game.balls++;
+            game.coinsThisGame += coinsEarned;
+
+            updateScoreboard();
+            
+            if (coinsEarned > 0) {
+                showMsg(`${msg} +${coinsEarned} coins!`, '#4caf50');
+            } else {
+                showMsg(msg, runs >= 4 ? '#4caf50' : '#ffc107');
+            }
+
+            // Trigger ball flight to boundary
+            if (runs >= 4) {
+                ball.hit = true;
+                ball.hitVelX = (Math.random() - 0.5) * 4;
+                if (runs === 6) {
+                    ball.hitVelY = -12; // High trajectory for six
+                } else {
+                    ball.hitVelY = -6;  // Lower for four
+                }
+                animateBall();
+            } else {
+                setTimeout(() => {
+                    batsman.swinging = false;
+                    bowlBall();
+                }, 2000);
+            }
+        }
+
+        // Ball missed
+        function ballMissed() {
+            ball.moving = false;
+            game.balls++;
+            game.outs++;
+
+            updateScoreboard();
+            showMsg('❌ OUT!', '#f44336');
+
+            if (game.outs >= 2) {
+                setTimeout(endGame, 2000);
+            } else {
+                setTimeout(() => {
+                    batsman.swinging = false;
+                    batsman.x = 400;
+                    bowlBall();
+                }, 2000);
+            }
+        }
+
+        // Update scoreboard
+        function updateScoreboard() {
+            document.getElementById('score').textContent = game.score;
+            document.getElementById('coins').textContent = game.coinsThisGame;
+            document.getElementById('balls').textContent = game.balls;
+            document.getElementById('outs').textContent = `${game.outs}/2`;
+            
+            const sk = skills[game.currentSkill];
+            document.getElementById('activeSkill').textContent = `${sk.icon} ${sk.name}`;
+        }
+
+        // Show message
+        function showMsg(text, color) {
+            const el = document.getElementById('message');
+            el.textContent = text;
+            el.style.color = color;
+        }
+
+        // End game
+        function endGame() {
+            game.running = false;
+
+            // Update stats
+            if (game.score > game.highScore) game.highScore = game.score;
+            game.totalGames++;
+            game.savedCoins += game.coinsThisGame;
+            saveGame();
+
+            // Show game over
+            hideAll();
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+            document.getElementById('finalScore').textContent = game.score;
+            document.getElementById('finalCoins').textContent = `Coins Earned: ${game.coinsThisGame}`;
+
+            const strikeRate = game.balls > 0 ? ((game.score / game.balls) * 100).toFixed(1) : 0;
+            document.getElementById('stats').innerHTML = `
+                <p><strong>Strike Rate:</strong> ${strikeRate}</p>
+                <p><strong>Balls Faced:</strong> ${game.balls}</p>
+                <hr style="margin: 15px 0; border: none; border-top: 2px solid #ddd;">
+                <p><strong>💰 Total Coins:</strong> ${game.savedCoins}</p>
+                <p><strong>🏆 High Score:</strong> ${game.highScore}</p>
+                <p><strong>🎮 Games Played:</strong> ${game.totalGames}</p>
+            `;
+        }
+
+        // Update start screen
+        function updateStartScreen() {
+            document.getElementById('startCoins').textContent = game.savedCoins;
+            document.getElementById('startHighScore').textContent = game.highScore;
+            document.getElementById('startGames').textContent = game.totalGames;
+        }
+
+        // Reset all
+        function resetAll() {
+            if (confirm('Reset all progress? This cannot be undone!')) {
+                localStorage.removeItem('cricketGame');
+                location.reload();
+            }
+        }
+
+        // Keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && game.running) {
+                e.preventDefault();
+                swing();
+            }
+            if (game.running && ball.moving) {
+                if (e.code === 'ArrowLeft') {
+                    e.preventDefault();
+                    batsman.x = Math.max(batsman.x - 20, 320);
+                }
+                if (e.code === 'ArrowRight') {
+                    e.preventDefault();
+                    batsman.x = Math.min(batsman.x + 20, 480);
+                }
+            }
+        });
+
+        // Initialize
+        loadGame();
+        updateStartScreen();
+    </script>
+</body>
+</html>
